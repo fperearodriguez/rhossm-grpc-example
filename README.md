@@ -113,7 +113,7 @@ You can check Kiali to see how the traffic flow is changing when creating the Is
 
 <img src="./ossm/images/1-greeter-client.png" alt="Kiali-1" width=40%>
 
-Create the Virtual Service for route the traffic from the greeter-client app to the egress gateway K8S Service.
+Create the Virtual Service to route the traffic from the greeter-client app to the egress gateway K8S Service.
 ```
 oc apply -f ossm/grpc-example-mesh/vs-greeter-server.yaml
 ```
@@ -122,7 +122,7 @@ Now, the greeter-client is redirect to the egress gateway K8S Service but it is 
 
 <img src="./ossm/images/2-greeter-client.png" alt="Kiali-2" width=40%>
 
-Apply the Destination Rule for use ISTIO_MUTUAL tls negotiation between the greeter client app and the egress gateways K8S Service.
+Apply the Destination Rule to use ISTIO_MUTUAL tls negotiation between the greeter client app and the egress gateways K8S Service.
 ```
 oc apply -f ossm/grpc-example-mesh/dr-greeter-server.yaml
 ```

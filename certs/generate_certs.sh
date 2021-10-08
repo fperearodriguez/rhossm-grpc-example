@@ -1,31 +1,26 @@
 #!/bin/bash
-# Generate CA and server and client certificate
-# Modified version of https://github.com/grpc/grpc-java/tree/master/examples/example-tls
 
 # Changes these CN's to match your hosts in your environment if needed.
-SERVER_CA_CN=greeter-server.grpc-example.svc.cluster.local
-SERVER_CN=greeter-server.grpc-example.svc.cluster.local
-CLIENT_CN=greeter-client.grpc-example.svc.cluster.local # Used when doing mutual TLS
+SERVER_CN=greeter-server-grpc-example.svc.cluster.local
+CLIENT_CN=greeter-client-grpc-example.svc.cluster.local # Used when doing mutual TLS
+CURRENT_DIR=$(pwd)
 
-echo Generate CA:
-openssl req -x509 -new -newkey rsa:4096 -keyout ca.key -nodes -out ca.pem -days 3650 -subj "/CN=${SERVER_CA_CN}"
+echo "Create CA"
+## generate rootca private key
+openssl genrsa  -out $CURRENT_DIR/certs/cakey.pem 4096
 
-echo Generate server key:
-openssl genrsa -out server.key.rsa 4096
-openssl pkcs8 -topk8 -in server.key.rsa -out server.key -nocrypt
-rm server.key.rsa
+## generate rootCA certificate
+openssl req -new -x509 -days 3650  -config $CURRENT_DIR/certs/cert.conf  -key $CURRENT_DIR/certs/cakey.pem -out $CURRENT_DIR/certs/ca.pem
 
-echo Generate server certificate:
-openssl req -new -key server.key -out server.csr -subj "/CN=${SERVER_CN}"
-openssl x509 -req -in server.csr -CA ca.pem -CAkey ca.key -CAcreateserial -out server.pem -days 365
-rm server.csr
+## Verify the rootCA certificate content and X.509 extensions
+openssl x509 -noout -text -in $CURRENT_DIR/certs/ca.pem
 
-echo Generate client key:
-openssl genrsa -out client.key.rsa 4096
-openssl pkcs8 -topk8 -in client.key.rsa -out client.key -nocrypt
-rm client.key.rsa
+echo "Client cert"
+openssl genrsa -out $CURRENT_DIR/certs/client.key 4096
+openssl req -new -key $CURRENT_DIR/certs/client.key -out $CURRENT_DIR/certs/client.csr -config $CURRENT_DIR/certs/cert.conf
+openssl x509 -req -in $CURRENT_DIR/certs/client.csr -CA $CURRENT_DIR/certs/ca.pem -CAkey $CURRENT_DIR/certs/cakey.pem -out $CURRENT_DIR/certs/client.pem -CAcreateserial -days 365 -sha256 -extfile $CURRENT_DIR/certs/client_cert_ext.conf
 
-echo Generate client certificate:
-openssl req -new -key client.key -out client.csr -subj "/CN=${CLIENT_CN}"
-openssl x509 -req -in client.csr -CA ca.pem -CAkey ca.key -CAcreateserial -out client.pem -days 365
-rm client.csr
+echo "Server cert"
+openssl genrsa -out $CURRENT_DIR/certs/server.key 4096
+openssl req -new -key $CURRENT_DIR/certs/server.key -out $CURRENT_DIR/certs/server.csr -config $CURRENT_DIR/certs/cert.conf
+openssl x509 -req -in $CURRENT_DIR/certs/server.csr -CA $CURRENT_DIR/certs/ca.pem -CAkey $CURRENT_DIR/certs/cakey.pem -out $CURRENT_DIR/certs/server.pem -CAcreateserial -days 365 -sha256 -extfile $CURRENT_DIR/certs/server_cert_ext.conf
