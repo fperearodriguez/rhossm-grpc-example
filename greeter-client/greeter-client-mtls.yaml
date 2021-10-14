@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: greeter-client-mtls
-        image: image-registry.openshift-image-registry.svc:5000/grpc-example/greeter-client:latest
+        image: quay.io/fperea_rh/greeter-client:latest
         volumeMounts:
         - name: greeter-certs
           mountPath: "/etc/greetercerts"

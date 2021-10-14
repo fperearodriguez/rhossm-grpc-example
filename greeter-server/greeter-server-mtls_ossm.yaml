@@ -10,7 +10,7 @@ spec:
   - name: grpc
     port: 8000
   selector:
-    app: greeter-server
+    app: greeter-server-mtls
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -20,29 +20,21 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: greeter-server
+      app: greeter-server-mtls
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
       labels:
-        app: greeter-server
+        app: greeter-server-mtls
     spec:
       containers:
       - name: greeter-server
         image: quay.io/fperea_rh/greeter-server:latest
         ports:
         - containerPort: 8000
-        volumeMounts:
-        - name: greeter-certs
-          mountPath: "/etc/greetercerts"
-          readOnly: true
         env:
         - name: GRPC_VERBOSITY
           value: "debug"
         - name: GREETER_SERVER_SECURITY
-          value: "mtls"
-        - name: CERTS_PATH
-          value: "/etc/greetercerts"
-      volumes:
-      - name: greeter-certs
-        secret:
-          secretName: greeter-server-certs
+          value: "insecure"

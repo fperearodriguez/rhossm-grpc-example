@@ -9,8 +9,9 @@ spec:
   servers:
   - hosts:
     - greeter-server.grpc-example.svc.cluster.local
+    - greeter-server.external
     port:
-      name: https-443
+      name: https
       number: 443
       protocol: HTTPS
     tls:
